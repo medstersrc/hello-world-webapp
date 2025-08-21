@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: hello-world
+  namespace: default
+  labels:
+    app: hello-world
 spec:
   replicas: 1
   selector:
@@ -12,21 +15,50 @@ spec:
       labels:
         app: hello-world
     spec:
+      imagePullSecrets:
+        - name: regcred   # your Docker Hub secret
       containers:
         - name: hello-world
-          image: medsterhub/hello-world-app:latest
+          image:  medsterhub/hello-world-app:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
+          env:
+            - name: NEW_RELIC_LICENSE_KEY
+              value: eu01xx577cc0f7d76378de40516191a3FFFFNRAL
+            - name: NEW_RELIC_APP_NAME
+              value: "HelloWorldApp"
+          volumeMounts:
+            - name: newrelic-agent
+              mountPath: /newrelic
+      volumes:
+        - name: newrelic-agent
+          configMap:
+            name: newrelic-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: hello-world
+  namespace: default
 spec:
+  type: NodePort
   selector:
     app: hello-world
   ports:
     - protocol: TCP
-      port: 80
+      port: 8080
       targetPort: 8080
-  type: NodePort
+      nodePort: 31000
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: newrelic-config
+  namespace: default
+data:
+  newrelic.yml: |
+    common: &default_settings
+      license_key: eu01xx577cc0f7d76378de40516191a3FFFFNRAL
+      app_name: HelloWorldApp
+      log_level: info
