@@ -18,7 +18,7 @@ RUN curl -L https://download.newrelic.com/newrelic/java-agent/newrelic-agent/cur
 # Set New Relic environment variables
 ENV NEW_RELIC_LICENSE_KEY=eu01xx577cc0f7d76378de40516191a3FFFFNRAL
 ENV NEW_RELIC_APP_NAME=HelloWorldApp
-ENV JAVA_TOOL_OPTIONS="-javaagent:/opt/newrelic/newrelic/newrelic.jar"
+ENV JAVA_TOOL_OPTIONS="-javaagent:/opt/newrelic/newrelic.jar"
 
 # Expose the port your Spring Boot app uses
 EXPOSE 8080
