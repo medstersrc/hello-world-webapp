@@ -12,7 +12,7 @@ class HelloWorldController {
     fun hello(@RequestParam name: String): String {
         logger.info("Received request for name={}", name)
        // logger.info("Received hello request with payload: {}", request)
-        return "Hello World From Spring Boot!"
+        return "Hello $name!"
     }
 
     @GetMapping("/bad/logging")
