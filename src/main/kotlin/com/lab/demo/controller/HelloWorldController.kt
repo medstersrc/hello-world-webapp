@@ -1,13 +1,33 @@
 package com.lab.demo.controller
 
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class HelloWorldController {
+    val logger: org.slf4j.Logger = org.slf4j.LoggerFactory.getLogger(HelloWorldController::class.java)
 
-    @GetMapping("/")
-    fun hello(): String {
+    @GetMapping("/hello")
+    fun hello(@RequestParam name: String): String {
+        logger.info("Received request for name={}", name)
+       // logger.info("Received hello request with payload: {}", request)
         return "Hello World From Spring Boot!"
     }
+
+    @GetMapping("/bad/logging")
+    fun badLogging(@RequestParam name: String): String {
+        val requestPayload = mapOf("name" to name, "ssn" to "123-45-6789")
+        logger.info("Payload: {}", requestPayload) // bad: logs sensitive data
+        return "bad"
+    }
+
+    @GetMapping("/good/redacted")
+    fun goodLogging(@RequestParam name: String): String {
+        val payload = mapOf("name" to name, "ssn" to "123-45-6789")
+        val safePayload = payload - "ssn"
+        logger.info("Payload received: {}", safePayload)
+        return "good"
+    }
+
 }
