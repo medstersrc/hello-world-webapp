@@ -1,19 +1,56 @@
-<configuration>
+<configuration scan="true" scanPeriod="60 seconds">
+
+    <!-- ============================================== -->
+    <!--  1. APPENDER: JSON logs to stdout              -->
+    <!-- ============================================== -->
+    <appender name="ASYNC_JSON_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="JSON_CONSOLE"/>
+        <queueSize>5000</queueSize> <!-- buffer -->
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
     <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-            <providers>
-                <timestamp/>
-                <logLevel/>
-                <threadName/>
-                <loggerName/>
-                <message/>
-                <mdc/>
-                <context/> <!-- extra structured fields -->
-            </providers>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+
+            <!-- Field mapping for consistent keys -->
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <message>message</message>
+                <logger>logger</logger>
+                <thread>thread</thread>
+                <level>level</level>
+            </fieldNames>
+
+            <!-- Include MDC fields (context data) -->
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>correlationId</includeMdcKeyName>
+
+            <!-- Redact sensitive data -->
+            <maskPatterns>
+                <!-- Email addresses -->
+                <maskPattern>[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}</maskPattern>
+            </maskPatterns>
+
         </encoder>
     </appender>
 
+
+    <!-- ============================================== -->
+    <!--  2. ROOT LOGGER CONFIG                         -->
+    <!-- ============================================== -->
     <root level="INFO">
-        <appender-ref ref="JSON_CONSOLE"/>
+        <appender-ref ref="ASYNC_JSON_CONSOLE"/>
     </root>
+
+
+    <!-- ============================================== -->
+    <!--  3. PACKAGE-SPECIFIC OVERRIDES                 -->
+    <!-- ============================================== -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="your.org.package" level="DEBUG"/>
+
 </configuration>
