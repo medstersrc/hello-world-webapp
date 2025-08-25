@@ -17,14 +17,14 @@ class HelloWorldController {
 
     @GetMapping("/bad/logging")
     fun badLogging(@RequestParam name: String): String {
-        val requestPayload = mapOf("name" to name, "email" to "name@mail.com")
+        val requestPayload = mapOf("name" to name, "email" to "$name@mail.com")
         logger.info("Payload: {}", requestPayload) // bad: logs sensitive data
         return "bad"
     }
 
     @GetMapping("/good/redacted")
     fun goodLogging(@RequestParam name: String): String {
-        val payload = mapOf("name" to name, "email" to "name@mail.com")
+        val payload = mapOf("name" to name, "email" to "$name@mail.com")
         val safePayload = payload - "email"
         logger.info("Payload received: {}", safePayload)
         return "good"

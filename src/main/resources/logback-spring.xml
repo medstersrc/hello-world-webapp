@@ -28,11 +28,11 @@
             <includeMdcKeyName>correlationId</includeMdcKeyName>
 
             <!-- Redact sensitive data -->
-            <maskPatterns>
+            <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
+            <defaultMask>********</defaultMask>
                 <!-- Email addresses -->
-                <maskPattern>[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}</maskPattern>
-            </maskPatterns>
-
+                <value>[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}</value>
+            </jsonGeneratorDecorator>
         </encoder>
     </appender>
 
