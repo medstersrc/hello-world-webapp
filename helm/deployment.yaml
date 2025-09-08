@@ -39,12 +39,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hello-world
+  name: hello-world-app
   namespace: default
 spec:
   type: NodePort
   selector:
-    app: hello-world
+    app: hello-world-app
   ports:
     - protocol: TCP
       port: 8080
