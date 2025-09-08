@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- ============================================= -->
+    <!-- Simple logs for local development (non-JSON) -->
+    <!-- ============================================= -->
+    <springProfile name="!json">
+        <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} %-5level [%thread] %logger - %msg %mdc%n</pattern>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="Console"/>
+        </root>
+    </springProfile>
+
+    <!-- ============================================= -->
+    <!-- JSON logs for non-local environments -->
+    <!-- ============================================= -->
+    <springProfile name="json">
+
+        <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+
+                <providers>
+                    <timestamp>
+                        <fieldName>timestamp</fieldName>
+                        <pattern>[ISO_OFFSET_DATE_TIME]</pattern>
+                        <timeZone>UTC</timeZone>
+                    </timestamp>
+
+                    <timestamp>
+                        <fieldName>epoch</fieldName>
+                        <pattern>[UNIX_TIMESTAMP_AS_NUMBER]</pattern>
+                    </timestamp>
+
+                    <logLevel/>
+                    <message/>
+
+                    <!-- MDC (Mapped Diagnostic Context) fields -->
+                    <mdc>
+                        <mdcKeyFieldName>camel.exchangeId=camel_exchange_id</mdcKeyFieldName>
+                        <mdcKeyFieldName>camel.contextId=camel_context_id</mdcKeyFieldName>
+                        <mdcKeyFieldName>camel.messageId=camel_message_id</mdcKeyFieldName>
+                        <mdcKeyFieldName>camel.routeId=camel_route_id</mdcKeyFieldName>
+                        <mdcKeyFieldName>camel.correlationId=camel_correlation_id</mdcKeyFieldName>
+                        <mdcKeyFieldName>camel.fromEndpoint=camel_from_endpoint</mdcKeyFieldName>
+                        <mdcKeyFieldName>camel.toNode=camel_to_node</mdcKeyFieldName>
+                        <mdcKeyFieldName>camel.redeliveryCounter=camel_redelivery_counter</mdcKeyFieldName>
+                        <mdcKeyFieldName>kafka.TOPIC=kafka_topic</mdcKeyFieldName>
+                        <mdcKeyFieldName>kafka.PARTITION=kafka_partition</mdcKeyFieldName>
+                        <mdcKeyFieldName>kafka.OFFSET=kafka_offset</mdcKeyFieldName>
+                        <mdcKeyFieldName>kafka.KEY=kafka_key</mdcKeyFieldName>
+                        <mdcKeyFieldName>GATEWAY_REQUEST_CORRELATION_ID=gateway_request_correlation_id</mdcKeyFieldName>
+
+                        <!-- Standard distributed tracing fields -->
+                        <mdcKeyFieldName>trace.id=trace_id</mdcKeyFieldName>
+                        <mdcKeyFieldName>span.id=span_id</mdcKeyFieldName>
+                    </mdc>
+
+                    <loggerName/>
+                    <threadName/>
+
+                    <!-- Stack traces with controlled depth / length -->
+                    <stackTrace>
+                        <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                            <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                            <maxLength>2048</maxLength>
+                            <shortenedClassNameLength>25</shortenedClassNameLength>
+                            <exclude>^sun\.reflect\..*\.invoke</exclude>
+                            <exclude>^net\.sf\.cglib\.proxy\.MethodProxy\.invoke</exclude>
+                            <rootCauseFirst>true</rootCauseFirst>
+                        </throwableConverter>
+                    </stackTrace>
+
+                    <!-- Global service metadata for New Relic / logging pipelines -->
+                    <provider class="net.logstash.logback.composite.GlobalCustomFields">
+                        <customFields>{
+                            "app":"${spring.application.name:-unknown}",
+                            "env":"${spring.profiles.active:-unknown}",
+                            "service.version":"${app.version:-unknown}"
+                            }
+                        </customFields>
+                    </provider>
+                </providers>
+            </encoder>
+        </appender>
+
+        <!-- Root logger sends all events to Console -->
+        <root level="INFO">
+            <appender-ref ref="Console"/>
+        </root>
+
+    </springProfile>
+
+</configuration>

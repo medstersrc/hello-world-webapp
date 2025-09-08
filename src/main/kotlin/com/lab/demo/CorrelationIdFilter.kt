@@ -15,6 +15,10 @@ class CorrelationIdFilter: OncePerRequestFilter() {
         filterChain: FilterChain
     ) {
         val correlationId = request.getHeader("X-Correlation-ID") ?: java.util.UUID.randomUUID().toString()
+        val traceId = java.util.UUID.randomUUID().toString()
+        val spanId = java.util.UUID.randomUUID().toString()
+        MDC.put("traceId", traceId)
+        MDC.put("spanId", spanId)
         MDC.put("correlationId", correlationId)
         try {
             filterChain.doFilter(request, response)

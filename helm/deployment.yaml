@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-world
-  namespace: default
+  name: hello-world-app
+  namespace: dev-hello-world-webapp
   labels:
-    app: hello-world
+    app: hello-world-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hello-world
+      app: hello-world-app
   template:
     metadata:
       labels:
-        app: hello-world
+        app: hello-world-app
     spec:
       imagePullSecrets:
         - name: regcred   # your Docker Hub secret
       containers:
-        - name: hello-world
+        - name: hello-world-app
           image:  medsterhub/hello-world-app:latest
           imagePullPolicy: Always
           ports:

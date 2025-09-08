@@ -1,42 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <springProfile name="!json">
+        <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} %-5level [%thread] %logger - %msg %mdc%n</pattern>
+            </encoder>
+        </appender>
 
-    <!-- Include environment variables -->
-    <property name="NEW_RELIC_LICENSE_KEY" value="eu01xx577cc0f7d76378de40516191a3FFFFNRAL"/>
-    <property name="APP_NAME" value="hello-world-webapp"/>
+        <root level="info">
+            <appender-ref ref="console"/>
+        </root>
 
-    <!-- Console appender for local debugging -->
-    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"app":"${APP_NAME}"}</customFields>
-            <includeMdcKeyName>requestId,userId,sessionId</includeMdcKeyName>
+    </springProfile>
 
-            <!-- Masking emails using MaskingJsonGeneratorDecorator -->
-            <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
-                <defaultMask>********</defaultMask>
-                <value>[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}</value>
-            </jsonGeneratorDecorator>
-        </encoder>
-    </appender>
+    <springProfile name="json">
 
-    <!-- New Relic Appender -->
-    <appender name="NewRelicConsole" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="com.newrelic.logging.logback.NewRelicEncoder">
-            <apiKey>${NEW_RELIC_LICENSE_KEY}</apiKey>
-            <serviceName>${APP_NAME}</serviceName>
-            <logLevel>INFO</logLevel>
-            <logFormat>JSON</logFormat>
-            <includeMdcKeyName>requestId,userId,sessionId</includeMdcKeyName>
-            <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
-                <defaultMask>********</defaultMask>
-                <value>[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}</value>
-            </jsonGeneratorDecorator>
-        </encoder>
-    </appender>
+        <!-- Console appender for local debugging -->
+        <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <providers>
+                    <timestamp>
+                        <fieldName>timestamp</fieldName>
+                        <pattern>[ISO_DATE_TIME]</pattern>
+                        <timeZone>UTC</timeZone>
+                    </timestamp>
+                    <timestamp>
+                        <fieldName>epoch</fieldName>
+                        <pattern>[UNIX_TIMESTAMP_AS_NUMBER]</pattern>
+                    </timestamp>
+                    <loglevel/>
+                    <message/>
+                    <mdc>
+                        <mdcKeyFieldName>camel.exchangeId=camel_exchange_id</mdcKeyFieldName>
+                        <mdcKeyFieldName>camel.contextId=camel_context_id</mdcKeyFieldName>
+                        <mdcKeyFieldName>camel.messageId=camel_message_id</mdcKeyFieldName>
+                        <mdcKeyFieldName>kafka.OFFSET=kafka_offset</mdcKeyFieldName>
+                        <mdcKeyFieldName>traceId=trace_id</mdcKeyFieldName>
+                        <mdcKeyFieldName>spanId=span_id</mdcKeyFieldName>
+                        <mdcKeyFieldName>GATEWAY_REQUEST_CORRELATION_ID=gateway_request_correlation_id</mdcKeyFieldName>
+                    </mdc>
+                    <loggerName/>
+                    <threadName/>
+                    <stackTrace>
+                        <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                            <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                            <maxLength>2048</maxLength>
+                            <shortenedClassNameLength>25</shortenedClassNameLength>
+                            <exclude>^sun\.reflect\..*\.invoke</exclude>
+                            <exclude>^net\.sf\.cglib\.proxy\.MethodProxy\.invoke</exclude>
+                            <rootCauseFirst>true</rootCauseFirst>
+                        </throwableConverter>
+                    </stackTrace>
+                </providers>
+            </encoder>
+        </appender>
 
-    <!-- Root logger -->
-    <root level="INFO">
-        <appender-ref ref="Console"/>
-        <appender-ref ref="NewRelicConsole"/>
-    </root>
-
+        <root level="INFO">
+            <appender-ref ref="console"/>
+        </root>
+    </springProfile>
 </configuration>
